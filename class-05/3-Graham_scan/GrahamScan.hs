@@ -52,8 +52,29 @@ f_dir a b c
 -}
 
 graham_scan :: [Point] -> [Point]
-graham_scan = undefined
+graham_scan = foldl cleanStack stack restPoints
+	where (stack, restPoints) = prepareData list
+	  cleanStack (x1:x0:rest) x2
+		| findDirection x0 x1 x2 /= L = cleanStack (x0:rest) x2
+		| otherwise = (x2:x1:x0:rest)
 
+prepareData list = ([head sList] ++ [p0], tail sList)
+	where
+	  sList = sortBy (compareAxisAngle p0) (tail ySortedList)
+  	  p0 = head ySortedList
+ 	  ySortedList = sortBy comparePointY list
+
+comparePointY a b
+	| y a < y b = LT
+	| otherwise = compare (x a) (x b)
+
+compareAxisAngle a b1 b2 = compare (getAxisAngle a b1) (getAxisAngle a b2)
+getAxisAngle a b = atan ((y b - y a) / (x b - x a))
 {-
-  5. Приведите несколько примеров работы функции graham_scan.
+5. Приведите несколько примеров работы функции graham_scan.
 -}
+graham_scan_test1 = graham_scan [Point 4 4, Point 6 3, Point 2 2, Point 9 5, Point 2 6, Point 6 7, Point 7 2]
+== [Point 2 6, Point 6 7, Point 9 5, Point 7 2, Point 2 2]
+graham_scan_test2 = graham_scan [Point 4 4, Point 6 3, Point 2 2, Point 5 5, Point 2 6, Point 6 7, Point 7 2, Point 5 4, Point 4 5, Point 3 5]
+== [Point 2 6, Point 6 7, Point 7 2, Point 2 2]
+
