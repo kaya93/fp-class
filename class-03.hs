@@ -16,8 +16,22 @@
   f) удалить из него все положительные чётные числа.
 -}
 
+import Data.List
+import Data.Char
+import Numeric
+
 f11a :: Integral a => [a] -> [a]
-f11a = map undefined
+f11a a = map (*2) a
+
+f11b a = map (\x -> if even x then x*2 else x) a
+
+f11c a = map (\x -> if odd x then 0 else x) a
+
+f11d a k = filter (\x -> if x<k || x==k then True else False) a
+
+f11e a = filter (<0) a
+
+f11f a = filter (\x -> if x>0 && even x then False else True) a
 
 {-
  1.2 Дан список декартовых координат точек на плоскости (пар вещественных чисел).
@@ -25,7 +39,17 @@ f11a = map undefined
   a) отфильтровать список так, чтобы в нём остались точки из заданной координатной четверти;
   b) преобразовать декартовы координаты в полярные.
 -}
+what_part (a,b) 
+	| (a>0 || a==0) && b>0 = 1
+	| (a<0) && (b>0 || b==0) = 2
+	| (a<0 || a==0) && (b<0) = 3
+	| otherwise = 4
 
+f12a a part = filter (\x -> if (what_part x) == part then True else False) a
+
+to_polar (a,b) = (sqrt(a*a+b*b),acos(a/(sqrt(a*a+b*b))))
+
+f12b a = map (to_polar) a
 {-
  1.3 Дан список слов.
   a) Преобразовать все слова к верхнему регистру.
@@ -34,7 +58,7 @@ f11a = map undefined
 -}
 
 f13a :: [String] -> [String]
-f13a = map undefined
+f13a a = map (map toUpper) a
 
 {-
 2. Формирование числовых последовательностей (iterate).
@@ -46,8 +70,20 @@ f13a = map undefined
 -}
 
 nats :: [Integer]
-nats = iterate undefined 0
+nats = iterate (+1) 0
 
+f2b :: [Integer]
+f2b = iterate (+2) 0
+
+f2c = iterate ((/2).(+1)) 1 -- применяет к 1 композицию функций беск. число раз
+
+f2d :: [Char]
+f2d = take 25 ['a'..'z'] -- берет первые 25 из списка
+
+f2e n = map (\d -> showIntAtBase 2 intToDigit d "" ) $ take (2^n) $ iterate (+1) 0 
+-- анонимная ф-ция тут переводит десятичное число в двоичное (ф-я showIntAtBase имеет 4 пара
+-- метра: 1 - в какую систему, 2 - функция перевода в char, 3 - число для перевода, 4 - что
+-- дописывается в конец строки представления
 {-
 3. Группировка списков.
   a) Дан список символов. Сгруппировать подряд идущие символы по принципу: цифры — не цифры — ...
@@ -61,7 +97,7 @@ nats = iterate undefined 0
 -}
 
 f3d :: [a] -> Int -> Int -> [[a]]
-f3d xs n m = undefined
+f3d xs n m = map (take n) $ takeWhile (\x -> length x > 0) $ iterate (drop m) xs
 
 -- Должно быть True
 test_f3d = f3d [1..10] 4 2 == [[1,2,3,4],[3,4,5,6],[5,6,7,8],[7,8,9,10],[9,10]]
@@ -78,3 +114,24 @@ test_f3d = f3d [1..10] 4 2 == [[1,2,3,4],[3,4,5,6],[5,6,7,8],[7,8,9,10],[9,10]]
     называется элемент, больший своих соседей.
  e) Дан список. Продублировать все его элементы.
 -}
+
+f4a string = length $ filter (\x -> isDigit x) string 
+
+fibs = 0 : 1 : zipWith (+) fibs (tail fibs)
+
+f4b pred from to = filter (pred) $ dropWhile (<from) $ takeWhile (\x -> x < to) fibs
+
+compareL l1 l2   -- компаратор для сравнения списков по их длинам
+	| length l1 < length l2 = LT
+	| length l1 == length l2 = EQ
+	| otherwise = GT
+
+f4c string n = take n $ map head $ reverse $ sortBy compareL $ group $ sort string
+{- суть: сортируем строку, затем бьем ее на группки по повторяющимся символам, затем сортируем список получившихся группок по длине группок, затем отхватываем головы этих группок и берем из получившегося списка нужные нам n элементов -}
+
+f4d list = map (\(x,y,z) -> y) $ filter (\(x,y,z) -> y>=x && y>=z) $ zip3 ([minBound::Int] ++ list) list (tail list ++ [minBound::Int])
+{- суть: строим тройки типа (лев_сосед, элемент, прав_сосед) для каждого элемента, получаем список троек, потом оставляем в списке только те тройки, где элемент максимален, затем строим список средних элементов троек -}
+
+f4e list = concat $ map (\x -> replicate 2 x) list
+{- суть: с помощью ф-ции replicate создаем список типа [[эл-т1,эл-т1],[эл-т2,эл-т2],...], затем с помощью фунции concat приводим его к виду [эл-т1,эл-т1,эл-т2,эл-т2,...] -}
+
